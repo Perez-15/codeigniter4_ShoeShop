@@ -16,6 +16,8 @@ $routes->get('/logout', 'AuthController::logout');
 // Public User Route
 $routes->get('/shoes', [\App\Controllers\ShoesController::class, 'index']);
 $routes->get('/buy/(:num)', [\App\Controllers\ShoesController::class, 'buy']);
+$routes->post('/confirm-purchase', 'ShoesController::confirmPurchase');
+$routes->get('/purchase-details', 'ShoesController::purchaseDetails');
 
 // Public API routes — accessible via Postman or frontend JS
 $routes->group('api', function ($routes) {
@@ -25,7 +27,7 @@ $routes->group('api', function ($routes) {
     $routes->delete('products/(:num)', 'ProductController::apiDelete/$1');
 });
 
-// 🔐 Protected routes (require auth)
+// Protected routes (require auth)
 $routes->group('', ['filter' => 'authGuard'], function ($routes) {
     $routes->get('/profile', 'ProfileController::index');
 
