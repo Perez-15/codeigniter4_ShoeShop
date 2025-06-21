@@ -134,11 +134,22 @@ class ProductController extends BaseController
     }
 
     public function apiDelete($id)
-    {
-        $model = new ProductModel();
+{
+    $model = new ProductModel();
+    $product = $model->find($id);
 
-        $model->delete($id);
-
-        return $this->response->setJSON(['status' => 'Product successfully deleted.']);
+    if (!$product) {
+        return $this->response->setJSON([
+            'status' => 'error',
+            'message' => "Product with ID $id not found."
+        ])->setStatusCode(404);
     }
+
+    $model->delete($id);
+
+    return $this->response->setJSON([
+        'status' => 'success',
+        'message' => 'Product successfully deleted.'
+    ]);
+}
 }
