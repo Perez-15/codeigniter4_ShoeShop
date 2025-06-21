@@ -71,42 +71,53 @@ class AuthController extends Controller
     }
 
     // Display the registration form
-    public function signup()
+        public function signup()
     {
         return view('auth/signup'); // Signup view
     }
 
     // Handle the registration form submission
-    public function doSignup()
-    {
-        $validation = \Config\Services::validation();
+public function doSignup()
+{
+    $validation = \Config\Services::validation();
 
-        $validation->setRules([
-            'username'    => 'required|is_unique[user.username]',
-            'email'       => 'required|valid_email|is_unique[user.email]',
-            'password'    => 'required|min_length[6]',
-            'confirm_pass' => 'matches[password]',
-        ]);
+    $validation->setRules([
+        'username'     => 'required|is_unique[user.username]',
+        'email'        => 'required|valid_email|is_unique[user.email]',
+        'password'     => 'required|min_length[6]',
+        'confirm_pass' => 'matches[password]',
+    ]);
 
-        if (!$validation->withRequest($this->request)->run()) {
-            return redirect()
-                ->back()
-                ->withInput()
-                ->with('validation', $validation);
-        }
-
-        // Validation passed — proceed with saving
-        $model = new UserModel();
-
-        $model->save([
-            'username' => $this->request->getPost('username'),
-            'email'    => $this->request->getPost('email'),
-            'password' => password_hash($this->request->getPost('password'), PASSWORD_DEFAULT),
-            'role'     => 'user'
-        ]);
-
-        return redirect('shoes')->with('msg', 'Account successfully created.');
+    if (!$validation->withRequest($this->request)->run()) {
+        return redirect()
+            ->back()
+            ->withInput()
+            ->with('validation', $validation);
     }
+
+    // Proceed with saving
+    $model = new UserModel();
+
+    $userData = [
+        'username' => $this->request->getPost('username'),
+        'email'    => $this->request->getPost('email'),
+        'password' => password_hash($this->request->getPost('password'), PASSWORD_DEFAULT),
+        'role'     => 'user'
+    ];
+
+    $model->save($userData);
+
+   
+    $userId = $model->getInsertID();
+
+    session()->set([
+        'is_logged_in' => true,
+        'user_id'      => $userId,
+        'role'         => 'user'
+    ]);
+
+    return redirect('shoes')->with('msg', 'Account successfully created and logged in.');
+}
 
     public function logout()
     {
